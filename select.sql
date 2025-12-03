@@ -1,7 +1,6 @@
 -- Eli's Queries
 
 -- Selects every City where the first letter equals their countrys first letter
-
 SELECT * FROM
 	(SELECT c.Name AS City, ci.Name AS Country FROM City AS ci
 	LEFT JOIN Country AS c
@@ -10,7 +9,6 @@ WHERE SUBSTRING(t.City, 1, 1) LIKE SUBSTRING(t.Country, 1, 1)
 ;
 
 -- Selects all countries having a language with over 50% usage despite it not being an official language
-
 SELECT c.name, t.language FROM Country AS c
 RIGHT JOIN
 	(SELECT * FROM CountryLanguage 
@@ -18,12 +16,51 @@ RIGHT JOIN
     ORDER BY Percentage DESC) AS t
 ON t.CountryCode = c.Code;
 
--- 
-SELECT * FROM Sport;
+-- Selects all countries which earned 0 medals in a certain sport and year of the olympic games
+-- despite having over 50 participants and 10,000,000 country population.
+SELECT c.Name as CountryName, t.Year, s.SportName FROM Country as c
+INNER JOIN
+	(SELECT o.CountryCode, o.SportID, o.Year FROM OlympicTeam AS o
+	WHERE TotalParticipants > 50 AND NoMedalCount = TotalParticipants) AS t
+ON c.Code = t.CountryCode
+INNER JOIN Sport as s
+ON s.SportID = t.SportID
+WHERE c.Population > 10000000;
 
-SELECT c.Name, s.SportID FROM Country AS c
-RIGHT JOIN CountrySport as s
-ON c.Code = s.CountryCode;
+-- Selects Olympic sports that get over 10 participants 
+-- and have been in the games over 100 times, returns average gold count & participants.
+SELECT 
+	s.SportName, 
+	AVG(o.TotalParticipants) AS AvgTotalParticipants,
+    AVG(o.GoldCount) AS AvgGoldCount 
+FROM Sport as s
+JOIN
+    OlympicTeam AS o ON s.SportID = o.SportID
+WHERE s.SportID IN
+	(SELECT o.SportID FROM OlympicTeam AS o
+    GROUP BY o.SportID
+    HAVING COUNT(o.SportID) > 100
+    AND AVG(o.TotalParticipants) > 10)
+GROUP BY s.SportName;
+
+-- Selects cities which have a population that makes up
+-- 10% of their respective countries population
+-- AND the countries GNP is higher than the global average
+SELECT 
+	ci.Name AS CityName, 
+    ci.Population,
+    t.Name AS CountryName,
+    t.Population AS CountryPopulation,
+    (ci.Population / t.Population) AS PopulationRatio
+FROM City AS ci
+LEFT JOIN
+	(SELECT * FROM Country
+    WHERE GNP > (SELECT AVG(GNP) FROM Country)
+    ) AS t
+ON ci.CountryCode = t.Code
+HAVING PopulationRatio > 0.10
+ORDER BY PopulationRatio DESC, ci.Population DESC;
+
 
 -- Brianna's Queries
 
@@ -98,6 +135,8 @@ WHERE CountryLanguage.CountryCode = (
     LIMIT 1
 )
 AND CountryLanguage.IsOfficial = 'T'
+
+
 
 
 -- Dhuha's Queries 
