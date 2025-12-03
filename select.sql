@@ -98,3 +98,68 @@ WHERE CountryLanguage.CountryCode = (
     LIMIT 1
 )
 AND CountryLanguage.IsOfficial = 'T'
+
+
+-- Dhuha's Queries 
+
+--  List all sports with the countries where they originated
+
+SELECT s.SportName, c.Name AS OriginCountry
+FROM Sport AS s
+JOIN Country AS c
+    ON s.CountryOrigin = c.Code;
+
+--  Show each country with its most popular sport
+
+SELECT c.Name AS Country, s.SportName, cs.Popularity
+FROM Country AS c
+JOIN CountrySport AS cs
+    ON c.Code = cs.CountryCode
+JOIN Sport AS s
+    ON cs.SportID = s.SportID
+JOIN (
+        SELECT CountryCode, MAX(Popularity) AS MaxPop
+        FROM CountrySport
+        GROUP BY CountryCode
+     ) AS t
+    ON t.CountryCode = cs.CountryCode
+   AND t.MaxPop = cs.Popularity;
+
+
+--  List all cities and the most popular sport in their country
+
+SELECT ci.Name AS City,
+       co.Name AS Country,
+       sp.SportName,
+       cs.Popularity
+FROM City AS ci
+JOIN Country AS co
+    ON ci.CountryCode = co.Code
+JOIN CountrySport AS cs
+    ON co.Code = cs.CountryCode
+JOIN Sport AS sp
+    ON cs.SportID = sp.SportID
+ORDER BY co.Name, cs.Popularity DESC;
+
+
+--  List countries grouped by continent with the sports they play
+
+SELECT co.Continent,
+       co.Name AS Country,
+       sp.SportName
+FROM Country AS co
+JOIN CountrySport AS cs
+    ON co.Code = cs.CountryCode
+JOIN Sport AS sp
+    ON cs.SportID = sp.SportID
+ORDER BY co.Continent, co.Name;
+
+-- Shows each country and how many sports are played there
+SELECT c.Name AS Country,
+       COUNT(cs.SportID) AS NumberOfSports
+FROM Country AS c
+JOIN CountrySport AS cs
+    ON c.Code = cs.CountryCode
+GROUP BY c.Name
+ORDER BY NumberOfSports DESC;;
+
