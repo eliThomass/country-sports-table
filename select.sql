@@ -202,3 +202,101 @@ JOIN CountrySport AS cs
 GROUP BY c.Name
 ORDER BY NumberOfSports DESC;;
 
+
+-- Ahad's Queries
+
+-- Query 1: Shows countries and with their best performing sport in olympics (which is most medals)
+SELECT c.Name AS Country, s.SportName, o.GoldCount + o.SilverCount + o.BronzeCount AS TotalMedals
+FROM Country AS c
+JOIN OlympicTeam AS o
+    ON c.Code = o.CountryCode
+JOIN Sport AS s
+    ON o.SportID = s.SportID
+JOIN (
+        SELECT CountryCode, Year, MAX(GoldCount + SilverCount + BronzeCount) AS MaxMedals
+        FROM OlympicTeam
+        GROUP BY CountryCode, Year
+     ) AS t
+    ON t.CountryCode = o.CountryCode
+   AND t.Year = o.Year
+   AND t.MaxMedals = (o.GoldCount + o.SilverCount + o.BronzeCount);
+
+
+-- Query 2: Lists cities and shows the most popular sport in the countries
+SELECT ci.Name AS City, c.Name AS Country, s.SportName, cs.Popularity
+FROM City AS ci
+JOIN Country AS c
+    ON ci.CountryCode = c.Code
+JOIN CountrySport AS cs
+    ON c.Code = cs.CountryCode
+JOIN Sport AS s
+    ON cs.SportID = s.SportID
+JOIN (
+        SELECT CountryCode, MAX(Popularity) AS MaxPop
+        FROM CountrySport
+        GROUP BY CountryCode
+     ) AS t
+    ON t.CountryCode = cs.CountryCode
+   AND t.MaxPop = cs.Popularity;
+
+
+-- Query 3: Countries with most spoken official language and most popular sport
+SELECT c.Name AS Country, cl.Language, s.SportName, cs.Popularity
+FROM Country AS c
+JOIN CountryLanguage AS cl
+    ON c.Code = cl.CountryCode
+JOIN (
+        SELECT CountryCode, MAX(Percentage) AS MaxPercent
+        FROM CountryLanguage
+        WHERE IsOfficial = 'T'
+        GROUP BY CountryCode
+     ) AS t
+    ON t.CountryCode = cl.CountryCode
+   AND t.MaxPercent = cl.Percentage
+JOIN CountrySport AS cs
+    ON c.Code = cs.CountryCode
+JOIN Sport AS s
+    ON cs.SportID = s.SportID
+JOIN (
+        SELECT CountryCode, MAX(Popularity) AS MaxPop
+        FROM CountrySport
+        GROUP BY CountryCode
+     ) AS t2
+    ON t2.CountryCode = cs.CountryCode
+   AND t2.MaxPop = cs.Popularity
+WHERE cl.IsOfficial = 'T';
+
+
+-- Query 4: This shows which countries had  most participants in each sport per year
+SELECT c.Name AS Country, s.SportName, o.Year, o.TotalParticipants
+FROM Country AS c
+JOIN OlympicTeam AS o
+    ON c.Code = o.CountryCode
+JOIN Sport AS s
+    ON o.SportID = s.SportID
+JOIN (
+        SELECT SportID, Year, MAX(TotalParticipants) AS MaxParticipants
+        FROM OlympicTeam
+        GROUP BY SportID, Year
+     ) AS t
+    ON t.SportID = o.SportID
+   AND t.Year = o.Year
+   AND t.MaxParticipants = o.TotalParticipants;
+
+
+-- Query 5: Shows where each sport originated and to which country plays it the most
+SELECT s.SportName, co_origin.Name AS OriginCountry, co_play.Name AS MostPopularCountry, cs.Popularity
+FROM Sport AS s
+JOIN Country AS co_origin
+    ON s.CountryOrigin = co_origin.Code
+JOIN CountrySport AS cs
+    ON s.SportID = cs.SportID
+JOIN Country AS co_play
+    ON cs.CountryCode = co_play.Code
+JOIN (
+        SELECT SportID, MAX(Popularity) AS MaxPop
+        FROM CountrySport
+        GROUP BY SportID
+     ) AS t
+    ON t.SportID = cs.SportID
+   AND t.MaxPop = cs.Popularity;
