@@ -200,7 +200,7 @@ FROM Country AS c
 JOIN CountrySport AS cs
     ON c.Code = cs.CountryCode
 GROUP BY c.Name
-ORDER BY NumberOfSports DESC;;
+ORDER BY NumberOfSports DESC;
 
 
 -- Ahad's Queries
