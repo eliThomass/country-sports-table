@@ -205,31 +205,14 @@ ORDER BY NumberOfSports DESC;
 
 -- Ahad's Queries
 
--- Query 1- This shows countries with their cities and what sports they play
-SELECT c.Name AS Country, ci.Name AS City, s.SportName, cs.Popularity
+-- Query 1: Countries and their cities with population info
+SELECT c.Name AS Country, ci.Name AS City, ci.Population, ci.District
 FROM Country AS c
 JOIN City AS ci
     ON c.Code = ci.CountryCode
-JOIN CountrySport AS cs
-    ON c.Code = cs.CountryCode
-JOIN Sport AS s
-    ON cs.SportID = s.SportID
-WHERE ci.Population > 100000
 ORDER BY c.Name, ci.Population DESC;
 
-
--- Query 2- Olympic teams with country and the sport info
-SELECT c.Name AS Country, s.SportName, o.Year, o.GoldCount, o.SilverCount, o.BronzeCount
-FROM Country AS c
-JOIN OlympicTeam AS o
-    ON c.Code = o.CountryCode
-JOIN Sport AS s
-    ON o.SportID = s.SportID
-WHERE o.TotalParticipants > 0
-ORDER BY o.Year DESC, c.Name;
-
-
--- Query 3- Countries with official languages and and their sports
+-- Query 2- Countries with official languages and and their sports
 SELECT c.Name AS Country, cl.Language, s.SportName, cs.Popularity
 FROM Country AS c
 JOIN CountryLanguage AS cl
@@ -242,7 +225,7 @@ WHERE cl.IsOfficial = 'T'
 ORDER BY c.Name, cs.Popularity DESC;
 
 
--- Query 4- Sports and where they came from plus countries that plays that sport
+-- Query 3- Sports and where they came from plus countries that plays that sport
 SELECT s.SportName, co_origin.Name AS OriginCountry, co_play.Name AS PlayingCountry, cs.Popularity
 FROM Sport AS s
 JOIN Country AS co_origin
@@ -254,14 +237,26 @@ JOIN Country AS co_play
 ORDER BY s.SportName, cs.Popularity DESC;
 
 
--- Query 5- Cities in corralation with olympic participation in their countries
-SELECT ci.Name AS City, c.Name AS Country, s.SportName, o.Year, o.TotalParticipants
-FROM City AS ci
-JOIN Country AS c
-    ON ci.CountryCode = c.Code
-JOIN OlympicTeam AS o
-    ON c.Code = o.CountryCode
+-- Query 4: Countries with their official languages
+SELECT c.Name AS Country, cl.Language, cl.Percentage, cl.IsOfficial
+FROM Country AS c
+JOIN CountryLanguage AS cl
+    ON c.Code = cl.CountryCode
+WHERE cl.IsOfficial = 'T'
+ORDER BY c.Name, cl.Percentage DESC;
+
+-- Query 5: Countries with their languages and sports they play
+SELECT c.Name AS Country, cl.Language, s.SportName, cs.Popularity
+FROM Country AS c
+JOIN CountryLanguage AS cl
+    ON c.Code = cl.CountryCode
+JOIN CountrySport AS cs
+    ON c.Code = cs.CountryCode
 JOIN Sport AS s
-    ON o.SportID = s.SportID
-WHERE ci.Population > 500000
-ORDER BY c.Name, o.Year DESC;
+    ON cs.SportID = s.SportID
+ORDER BY c.Name, cl.Language, cs.Popularity DESC;
+
+
+
+
+
