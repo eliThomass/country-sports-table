@@ -88,7 +88,7 @@ ORDER BY LeastPopular ASC
 LIMIT 10;
 
 
--- Query with subquery that shows the LEAST popular sport in Asian countries who have official languages
+-- Query with subquery that shows the sports, organized by popularity, in Asian countries who have official languages
 SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity, CountryLanguage.Language
 FROM Sport
 JOIN CountrySport ON Sport.SportID = CountrySport.SportID
