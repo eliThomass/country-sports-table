@@ -64,7 +64,7 @@ ORDER BY PopulationRatio DESC, ci.Population DESC;
 
 -- Brianna's Queries
 
--- Subquery of sports that are more popular than the average popularity. 
+-- Query with subquery that shows sports that are more popular than the average popularity. 
 SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity -- Select the SportName variable from the "Sport" table
 FROM Sport 
 JOIN CountrySport ON Sport.SportID = CountrySport.SportID
@@ -74,7 +74,7 @@ WHERE CountrySport.Popularity > (
 )
 ORDER BY CountrySport.Popularity DESC;
     
--- Subquery that finds the top 10 least popular sports in europe
+-- Query with subquery that finds the top 10 least popular sports in europe
 SELECT Sport.SportName, Sport.SportID, MIN(CountrySport.Popularity) AS MinPopularity
 FROM Sport
 JOIN CountrySport ON Sport.SportID = CountrySport.SportID
@@ -88,7 +88,7 @@ ORDER BY MinPopularity ASC
 LIMIT 10;
 
 
--- Subquery that shows the LEAST popular sport in Asian countries who have official languages
+-- Query with subquery that shows the LEAST popular sport in Asian countries who have official languages
 SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity, CountryLanguage.Language
 FROM Sport
 JOIN CountrySport ON Sport.SportID = CountrySport.SportID
@@ -101,7 +101,7 @@ WHERE CountryLanguage.IsOfficial = 'T'
   )
 ORDER BY CountryLanguage.Language ASC;
     
--- Subquery that finds cities in Italy with the lowest population
+-- Query with subquery that finds cities in Italy with the lowest population
 SELECT Name as CityName, Population, CountryCode,
 	( 
 		SELECT Name 
@@ -116,7 +116,7 @@ WHERE CountryCode = (
 )
 ORDER BY Population ASC;
 
--- Subquery that finds the largest cities where basketball is played
+-- Query with subquery that finds the largest cities where basketball is played
 SELECT City.Name AS CityName, City.Population, City.CountryCode
 FROM City
 WHERE City.CountryCode IN (
