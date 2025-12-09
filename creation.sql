@@ -29,6 +29,7 @@ CREATE TABLE OlympicTeam (
     GoldCount INT(11) DEFAULT '0',
     SilverCount INT(11) DEFAULT '0',
     BronzeCount INT(11) DEFAULT '0',
+    NoMedalCount INT(11) DEFAULT '0',
     TotalParticipants INT(11) DEFAULT NULL,
     PRIMARY KEY (OlympicTeamID),
     FOREIGN KEY (CountryCode) REFERENCES Country (Code),
