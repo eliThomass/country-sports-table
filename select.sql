@@ -72,31 +72,34 @@ WHERE CountrySport.Popularity > (
 	SELECT AVG(Popularity) 
     FROM CountrySport
 )
-ORDER BY CountrySport.Popularity ASC;
+ORDER BY CountrySport.Popularity DESC;
     
--- Subquery of the sports played by the country with the most population, sorted by popularity
-SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity
-FROM Sport
-JOIN CountrySport ON Sport.SportID = CountrySport.SportID
-WHERE CountrySport.CountryCode = (
-	SELECT Code
-    FROM Country
-    ORDER BY Population DESC
-    LIMIT 1
-)
-ORDER BY CountrySport.Popularity ASC;
-
--- Subquery that shows the LEAST popular sports in italian-speaking countries
-SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity
+-- Subquery that finds the top 10 least popular sports in europe
+SELECT Sport.SportName, Sport.SportID, MIN(CountrySport.Popularity) AS MinPopularity
 FROM Sport
 JOIN CountrySport ON Sport.SportID = CountrySport.SportID
 WHERE CountrySport.CountryCode IN (
-	SELECT CountryCode
-    FROM CountryLanguage
-    WHERE Language = 'Italian'
-		AND IsOfficial = 'T'
+    SELECT Code
+    FROM Country
+    WHERE Continent = 'Europe'
 )
-ORDER BY CountrySport.Popularity ASC;
+GROUP BY Sport.SportName, Sport.SportID
+ORDER BY MinPopularity ASC
+LIMIT 10;
+
+
+-- Subquery that shows the LEAST popular sport in Asian countries who have official languages
+SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity, CountryLanguage.Language
+FROM Sport
+JOIN CountrySport ON Sport.SportID = CountrySport.SportID
+JOIN CountryLanguage ON CountrySport.CountryCode = CountryLanguage.CountryCode
+WHERE CountryLanguage.IsOfficial = 'T'
+  AND CountryLanguage.CountryCode IN (
+      SELECT Code
+      FROM Country
+      WHERE Continent = 'Asia'
+  )
+ORDER BY CountryLanguage.Language ASC;
     
 -- Subquery that finds cities in Italy with the lowest population
 SELECT Name as CityName, Population, CountryCode,
@@ -113,23 +116,16 @@ WHERE CountryCode = (
 )
 ORDER BY Population ASC;
 
--- Subquery that finds the official language or languages of the country whos most popular sport is tennis and any other popular sports they have
-SELECT CountryLanguage.Language, CountryLanguage.CountryCode, Sport.SportName, CountrySport.Popularity
-FROM CountryLanguage
-JOIN CountrySport ON CountryLanguage.CountryCode = CountrySport.CountryCode
-JOIN Sport ON Sport.SportID = CountrySport.SportID
-WHERE CountryLanguage.IsOfficial = 'T'
-	AND CountrySport.CountryCode = (
-		SELECT CountrySport.CountryCode
-        FROM CountrySport
-        JOIN Sport ON Sport.SportID = CountrySport.SportID
-        WHERE Sport.SportName = 'Tennis'
-		ORDER BY CountrySport.Popularity ASC
-        LIMIT 1
-	)
-ORDER BY CountrySport.Popularity DESC;
-
-
+-- Subquery that finds the largest cities where basketball is played
+SELECT City.Name AS CityName, City.Population, City.CountryCode
+FROM City
+WHERE City.CountryCode IN (
+    SELECT CountryCode
+    FROM CountrySport
+    JOIN Sport ON CountrySport.SportID = Sport.SportID
+    WHERE Sport.SportName = 'Basketball'
+)
+ORDER BY City.Population DESC;
 
 -- Dhuha's Queries 
 
