@@ -65,77 +65,69 @@ ORDER BY PopulationRatio DESC, ci.Population DESC;
 -- Brianna's Queries
 
 -- Subquery of sports that are more popular than the average popularity. 
-SELECT SportName -- Select the SportName variable from the "Sport" table
+SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity -- Select the SportName variable from the "Sport" table
 FROM Sport 
-WHERE SportID IN ( -- Find the SportID in table "CountrySport" that meet the following conditions
-	SELECT SportID 
-    FROM CountrySport 
-    WHERE Popularity > ( -- Specifically, the SportID where the popularity is greater than the average popularity
-		SELECT AVG(Popularity) -- Calc avg popularity in CountrySport table
-        FROM CountrySport 
-        )
-	);
+JOIN CountrySport ON Sport.SportID = CountrySport.SportID
+WHERE CountrySport.Popularity > (
+	SELECT AVG(Popularity) 
+    FROM CountrySport
+)
+ORDER BY CountrySport.Popularity ASC;
     
--- Subquery of the sports that are played by the country with the highest population
-SELECT SportName
+-- Subquery of the sports played by the country with the most population, sorted by popularity
+SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity
 FROM Sport
-WHERE SportID IN (
-	SELECT SportID
-    FROM CountrySport
-    WHERE CountryCode = (
-		SELECT Code
-        FROM Country
-        ORDER BY Population DESC
-        LIMIT 1
-	)
-);
-
--- Subquery that shows the LEAST popular sport in countries where Italian is spoken
-SELECT SportName
-From Sport
-Where SportID = (
-	SELECT SportID
-    FROM CountrySport
-    WHERE CountryCode IN (
-		SELECT CountryCode
-        FROM CountryLanguage 
-        WHERE Language = 'Italian' AND IsOfficial = 'T'
-	)
-    ORDER BY Popularity ASC
+JOIN CountrySport ON Sport.SportID = CountrySport.SportID
+WHERE CountrySport.CountryCode = (
+	SELECT Code
+    FROM Country
+    ORDER BY Population DESC
     LIMIT 1
-);
+)
+ORDER BY CountrySport.Popularity ASC;
+
+-- Subquery that shows the LEAST popular sports in italian-speaking countries
+SELECT Sport.SportName, Sport.SportID, CountrySport.CountryCode, CountrySport.Popularity
+FROM Sport
+JOIN CountrySport ON Sport.SportID = CountrySport.SportID
+WHERE CountrySport.CountryCode IN (
+	SELECT CountryCode
+    FROM CountryLanguage
+    WHERE Language = 'Italian'
+		AND IsOfficial = 'T'
+)
+ORDER BY CountrySport.Popularity ASC;
     
--- Subquery that finds the city in Italy with the lowest population
-SELECT Name as CityName, Population
+-- Subquery that finds cities in Italy with the lowest population
+SELECT Name as CityName, Population, CountryCode,
+	( 
+		SELECT Name 
+        FROM Country
+        WHERE Code = City.CountryCode
+	) AS CountryName
 FROM City
 WHERE CountryCode = (
 	SELECT Code
     FROM Country
     WHERE Name = "Italy"
 )
-AND Population = (
-	SELECT MIN(Population)
-    FROM CITY
-    WHERE CountryCode = (
-		SELECT Code
-        FROM Country
-        WHERE Name = "Italy"
+ORDER BY Population ASC;
+
+-- Subquery that finds the official language or languages of the country whos most popular sport is tennis and any other popular sports they have
+SELECT CountryLanguage.Language, CountryLanguage.CountryCode, Sport.SportName, CountrySport.Popularity
+FROM CountryLanguage
+JOIN CountrySport ON CountryLanguage.CountryCode = CountrySport.CountryCode
+JOIN Sport ON Sport.SportID = CountrySport.SportID
+WHERE CountryLanguage.IsOfficial = 'T'
+	AND CountrySport.CountryCode = (
+		SELECT CountrySport.CountryCode
+        FROM CountrySport
+        JOIN Sport ON Sport.SportID = CountrySport.SportID
+        WHERE Sport.SportName = 'Tennis'
+		ORDER BY CountrySport.Popularity ASC
+        LIMIT 1
 	)
-);
-
--- Subquery that finds the official language or languages of the country whos most popular sport is tennis
-SELECT CountryLanguage.Language
-FROM CountryLanguage 
-WHERE CountryLanguage.CountryCode = (
-	SELECT CountrySport.CountryCode
-    FROM CountrySport
-    JOIN Sport ON CountrySport.SportID = Sport.SportID
-    WHERE Sport.SportName = 'Tennis'
-    ORDER BY CountrySport.Popularity DESC
-    LIMIT 1
-)
-AND CountryLanguage.IsOfficial = 'T'
-
+ORDER BY CountrySport.Popularity DESC;
 
 
 
