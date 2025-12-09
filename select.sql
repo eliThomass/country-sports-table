@@ -75,7 +75,7 @@ WHERE CountrySport.Popularity > (
 ORDER BY CountrySport.Popularity DESC;
     
 -- Query with subquery that finds the top 10 least popular sports in europe
-SELECT Sport.SportName, Sport.SportID, MIN(CountrySport.Popularity) AS MinPopularity
+SELECT Sport.SportName, Sport.SportID, MIN(CountrySport.Popularity) AS LeastPopular
 FROM Sport
 JOIN CountrySport ON Sport.SportID = CountrySport.SportID
 WHERE CountrySport.CountryCode IN (
@@ -84,7 +84,7 @@ WHERE CountrySport.CountryCode IN (
     WHERE Continent = 'Europe'
 )
 GROUP BY Sport.SportName, Sport.SportID
-ORDER BY MinPopularity ASC
+ORDER BY LeastPopular ASC
 LIMIT 10;
 
 
