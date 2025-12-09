@@ -21,7 +21,7 @@ ON t.CountryCode = c.Code;
 SELECT c.Name as CountryName, t.Year, s.SportName FROM Country as c
 INNER JOIN
 	(SELECT o.CountryCode, o.SportID, o.Year FROM OlympicTeam AS o
-	WHERE TotalParticipants > 50 AND NoMedalCount = TotalParticipants) AS t
+	WHERE TotalParticipants > 20 AND NoMedalCount = TotalParticipants) AS t
 ON c.Code = t.CountryCode
 INNER JOIN Sport as s
 ON s.SportID = t.SportID
@@ -39,8 +39,8 @@ JOIN
 WHERE s.SportID IN
 	(SELECT o.SportID FROM OlympicTeam AS o
     GROUP BY o.SportID
-    HAVING COUNT(o.SportID) > 100
-    AND AVG(o.TotalParticipants) > 10)
+    HAVING COUNT(o.SportID) > 30
+    AND AVG(o.TotalParticipants) > 5)
 GROUP BY s.SportName;
 
 -- Selects cities which have a population that makes up
